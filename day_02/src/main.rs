@@ -35,11 +35,63 @@ impl TryFrom<String> for Direction {
 
 #[derive(Debug)]
 struct Position {
+    aim: isize,
+    depth: isize,
+    horizontal: isize,
+}
+
+impl Position {
+    pub fn apply_first_directions(&mut self, directions: &Vec<Direction>) {
+        for dir in directions.iter() {
+            match dir {
+                Direction::Down(cnt) => { self.depth += cnt; },
+                Direction::Forward(cnt) => { self.horizontal += cnt; },
+                Direction::Up(cnt) => { self.depth -= cnt; },
+            }
+        }
+    }
+
+    pub fn apply_second_directions(&mut self, directions: &Vec<Direction>) {
+        for dir in directions.iter() {
+            match dir {
+                Direction::Down(cnt) => { self.aim += cnt; },
+                Direction::Forward(cnt) => {
+                    self.depth += self.aim * cnt;
+                    self.horizontal += cnt;
+                },
+                Direction::Up(cnt) => { self.aim -= cnt; },
+            }
+        }
+    }
+
+    pub fn sum(&self) -> isize {
+        self.horizontal * self.depth
+    }
+}
+
+impl Default for Position {
+    fn default() -> Self {
+        Self {
+            aim: 0,
+            depth: 0,
+            horizontal: 0,
+        }
+    }
 }
 
 fn main() {
     let input_entries = read_puzzle_input(2);
     let directions: Vec<Direction> = input_entries.into_iter().map(|e| Direction::try_from(e).unwrap()).collect();
+
+    let mut position = Position::default();
+    position.apply_first_directions(&directions);
+
+    println!("day 02/1: {}", position.sum());
+
+    let mut position = Position::default();
+    position.apply_second_directions(&directions);
+
+    println!("day 02/2: {}", position.sum());
 }
 
 #[cfg(test)]
@@ -61,7 +113,26 @@ mod tests {
     }
 
     #[test]
-    fn test_run_sample_data() {
-        let directions = REFERENCE_INPUT.iter().map(|e| Direction::try_from(e.to_string()).unwrap()).collect();
+    fn test_run_first_sample_data() {
+        let directions: Vec<Direction> = REFERENCE_INPUT.lines().map(|e| Direction::try_from(e.to_string()).unwrap()).collect();
+
+        let mut position = Position::default();
+        position.apply_first_directions(&directions);
+
+        assert_eq!(position.depth, 10);
+        assert_eq!(position.horizontal, 15);
+        assert_eq!(position.sum(), 150);
+    }
+
+    #[test]
+    fn test_run_second_sample_data() {
+        let directions: Vec<Direction> = REFERENCE_INPUT.lines().map(|e| Direction::try_from(e.to_string()).unwrap()).collect();
+
+        let mut position = Position::default();
+        position.apply_second_directions(&directions);
+
+        assert_eq!(position.depth, 60);
+        assert_eq!(position.horizontal, 15);
+        assert_eq!(position.sum(), 900);
     }
 }
