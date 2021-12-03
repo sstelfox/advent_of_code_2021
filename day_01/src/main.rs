@@ -1,58 +1,23 @@
-use std::fs::File;
-use std::io::Read;
+use common::read_puzzle_input;
 
 fn count_sequential_increases(list: &[isize]) -> usize {
-    debug_assert!(list.len() > 0);
-
-    let mut list_iter = list.iter();
-    let mut seq_increase_count = 0;
-
-    let mut last_entry = list_iter.next().unwrap();
-    for entry in list_iter {
-        if entry > last_entry {
-            seq_increase_count += 1;
-        }
-
-        last_entry = entry;
-    }
-
-    seq_increase_count
+    count_sliding_sequential_increases(1, list)
 }
 
 fn count_sliding_sequential_increases(slide_size: usize, list: &[isize]) -> usize {
-    debug_assert!(list.len() > (slide_size - 1));
+    let sums: Vec<isize> = list
+        .windows(slide_size)
+        .map(|window| window.iter().sum())
+        .collect();
 
-    let sublist = &list[0..slide_size];
-
-    let mut last_sum: isize = sublist.iter().sum();
-    let mut seq_increase_count = 0;
-
-    for offset in 1..(list.len() - slide_size + 1) {
-        let sublist = &list[offset..(offset + slide_size)];
-
-        if sublist.len() < slide_size {
-            panic!("sublist wasn't large enough");
-        }
-
-        let current_sum: isize = sublist.iter().sum();
-
-        if current_sum > last_sum {
-            seq_increase_count += 1;
-        }
-
-        last_sum = current_sum;
-    }
-
-    seq_increase_count
+    sums.windows(2).filter(|pair| pair[0] < pair[1]).count()
 }
 
 fn main() {
-    let mut in_dat_fh = File::open("./data/day_01.txt").unwrap();
-    let mut in_dat = String::new();
-
-    in_dat_fh.read_to_string(&mut in_dat).unwrap();
-
-    let input_entries: Vec<isize> = in_dat.lines().map(|i| i.parse::<isize>().unwrap()).collect();
+    let input_entries: Vec<isize> = read_puzzle_input(1)
+        .iter()
+        .map(|i| i.parse::<isize>().unwrap())
+        .collect();
 
     println!("{}", count_sequential_increases(&input_entries));
     println!("{}", count_sliding_sequential_increases(3, &input_entries));

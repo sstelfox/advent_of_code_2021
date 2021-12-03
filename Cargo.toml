@@ -1,2 +1,2 @@
 [workspace]
-members = ["day_01"]
+members = ["common", "day_01"]
