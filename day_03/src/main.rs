@@ -1,11 +1,56 @@
 use common::read_puzzle_input;
 
 fn calculate_epsilon(entries: &Vec<isize>, bit_width: usize) -> usize {
-    0
+    let mut bit_counts = vec![0; bit_width];
+    for ent in entries.iter() {
+        for bit in 1..(bit_width + 1) {
+            if (*ent & 1 << bit) > 0 {
+                bit_counts[bit_width - bit] += 1;
+            }
+        }
+    }
+
+    let length = entries.len();
+    let threshold = length / 2;
+    let mut total = 0;
+
+    for (bit, count) in bit_counts.iter().enumerate() {
+        if *count <= threshold as isize {
+            total += 1 << bit;
+        }
+    }
+
+    total
 }
 
 fn calculate_gamma(entries: &Vec<isize>, bit_width: usize) -> usize {
-    0
+    let mut bit_counts = vec![0; bit_width];
+    for ent in entries.iter() {
+        for bit in 1..(bit_width + 1) {
+            if (*ent & 1 << bit) > 0 {
+                bit_counts[bit_width - bit] += 1;
+            }
+        }
+    }
+
+    println!("resulting bit counts: {:?}", bit_counts);
+
+    let length = entries.len();
+    let threshold = length / 2;
+    let mut total = 0;
+
+    println!("length:{}, threshold:{}", length, threshold);
+
+    for (bit, count) in bit_counts.iter().enumerate() {
+        if *count > threshold as isize {
+            println!("bit:{} count:{}", bit, count);
+            total += 1 << bit;
+        }
+    }
+
+    println!("total:{}", total);
+
+    total
 }
 
 fn diagnostic_power_level(input: &Vec<String>) -> usize {
