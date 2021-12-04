@@ -54,7 +54,18 @@ fn diagnostic_power_level(entries: &Vec<isize>, bit_width: usize) -> usize {
     epsilon * gamma
 }
 
-fn life_support_rating(input: &Vec<isize>, bit_width: usize) -> usize {
+fn life_support_rating(entries: &Vec<isize>, bit_width: usize) -> usize {
+    let co2 = co2_scrubber_rating(&entries, bit_width);
+    let oxygen = oxygen_generator_rating(&entries, bit_width);
+
+    co2 * oxygen
+}
+
+fn co2_scrubber_rating(entries: &Vec<isize>, bit_width: usize) -> usize {
+    0
+}
+
+fn oxygen_generator_rating(entries: &Vec<isize>, bit_width: usize) -> usize {
     0
 }
 
@@ -69,6 +80,7 @@ fn main() {
     let bit_len = input[0].trim().len();
 
     println!("diagnostic power level: {}", diagnostic_power_level(&parsed_input, bit_len));
+    println!("life support rating: {}", life_support_rating(&parsed_input, bit_len));
 }
 
 #[cfg(test)]
@@ -109,6 +121,7 @@ mod tests {
             0b11110000,
             0b00001111,
         ];
+
         assert_eq!(bit_counts(&input, 8), vec![1, 2, 1, 2, 1, 2, 1, 2]);
     }
 }
