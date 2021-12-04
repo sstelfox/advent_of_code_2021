@@ -20,13 +20,12 @@ fn bit_counts(entries: &Vec<isize>, bit_width: usize) -> Vec<usize> {
 fn calculate_epsilon(entries: &Vec<isize>, bit_width: usize) -> usize {
     let bit_counts = bit_counts(entries, bit_width);
 
-    let length = entries.len();
-    let threshold = length / 2;
+    let threshold = entries.len() / 2;
     let mut total = 0;
 
     for (bit, count) in bit_counts.iter().enumerate() {
         if *count <= threshold {
-            total += 1 << bit;
+            total += 1 << (bit_width - bit - 1);
         }
     }
 
@@ -36,17 +35,14 @@ fn calculate_epsilon(entries: &Vec<isize>, bit_width: usize) -> usize {
 fn calculate_gamma(entries: &Vec<isize>, bit_width: usize) -> usize {
     let bit_counts = bit_counts(entries, bit_width);
 
-    let length = entries.len();
-    let threshold = length / 2;
+    let threshold = entries.len() / 2;
     let mut total = 0;
 
     for (bit, count) in bit_counts.iter().enumerate() {
         if *count > threshold {
-            total += 1 << bit;
+            total += 1 << (bit_width - bit - 1);
         }
     }
-
-    println!("total:{:#01$b}", total, bit_width);
 
     total
 }
@@ -63,7 +59,8 @@ fn diagnostic_power_level(input: &Vec<String>) -> usize {
 }
 
 fn main() {
-    let _input_entries = read_puzzle_input(3);
+    let input_entries = read_puzzle_input(3);
+    println!("diagnostic power level: {}", diagnostic_power_level(&input_entries));
 }
 
 #[cfg(test)]
