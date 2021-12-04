@@ -1,21 +1,31 @@
 use common::read_puzzle_input;
 
-fn calculate_epsilon(entries: &Vec<isize>, bit_width: usize) -> usize {
+fn bit_counts(entries: &Vec<isize>, bit_width: usize) -> Vec<usize> {
     let mut bit_counts = vec![0; bit_width];
+
     for ent in entries.iter() {
-        for bit in 1..(bit_width + 1) {
-            if (*ent & 1 << bit) > 0 {
-                bit_counts[bit_width - bit] += 1;
+        for bit in 0..bit_width {
+            let relevant_bit = 1 << bit;
+
+            if (*ent & relevant_bit) > 0 {
+                let bit_target = (bit_width - bit) - 1;
+                bit_counts[bit_target] += 1;
             }
         }
     }
+
+    bit_counts
+}
+
+fn calculate_epsilon(entries: &Vec<isize>, bit_width: usize) -> usize {
+    let bit_counts = bit_counts(entries, bit_width);
 
     let length = entries.len();
     let threshold = length / 2;
     let mut total = 0;
 
     for (bit, count) in bit_counts.iter().enumerate() {
-        if *count <= threshold as isize {
+        if *count <= threshold {
             total += 1 << bit;
         }
     }
@@ -24,31 +34,19 @@ fn calculate_epsilon(entries: &Vec<isize>, bit_width: usize) -> usize {
 }
 
 fn calculate_gamma(entries: &Vec<isize>, bit_width: usize) -> usize {
-    let mut bit_counts = vec![0; bit_width];
-    for ent in entries.iter() {
-        for bit in 1..(bit_width + 1) {
-            if (*ent & 1 << bit) > 0 {
-                bit_counts[bit_width - bit] += 1;
-            }
-        }
-    }
-
-    println!("resulting bit counts: {:?}", bit_counts);
+    let bit_counts = bit_counts(entries, bit_width);
 
     let length = entries.len();
     let threshold = length / 2;
     let mut total = 0;
 
-    println!("length:{}, threshold:{}", length, threshold);
-
     for (bit, count) in bit_counts.iter().enumerate() {
-        if *count > threshold as isize {
-            println!("bit:{} count:{}", bit, count);
+        if *count > threshold {
             total += 1 << bit;
         }
     }
 
-    println!("total:{}", total);
+    println!("total:{:#01$b}", total, bit_width);
 
     total
 }
@@ -65,8 +63,7 @@ fn diagnostic_power_level(input: &Vec<String>) -> usize {
 }
 
 fn main() {
-    let input_entries = read_puzzle_input(3);
-
+    let _input_entries = read_puzzle_input(3);
 }
 
 #[cfg(test)]
@@ -95,5 +92,18 @@ mod tests {
         assert_eq!(calculate_gamma(&entries, 5), 22);
 
         assert_eq!(diagnostic_power_level(&input), 198);
+    }
+
+    #[test]
+    fn test_bit_counts() {
+        let input = vec![0b101010];
+        assert_eq!(bit_counts(&input, 6), vec![1, 0, 1, 0, 1, 0]);
+
+        let input = vec![
+            0b01010101,
+            0b11110000,
+            0b00001111,
+        ];
+        assert_eq!(bit_counts(&input, 8), vec![1, 2, 1, 2, 1, 2, 1, 2]);
     }
 }
