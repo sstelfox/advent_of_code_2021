@@ -47,6 +47,10 @@ fn calculate_gamma(entries: &Vec<isize>, bit_width: usize) -> usize {
     total
 }
 
+fn co2_scrubber_rating(entries: &Vec<isize>, bit_width: usize) -> usize {
+    0
+}
+
 fn diagnostic_power_level(entries: &Vec<isize>, bit_width: usize) -> usize {
     let epsilon = calculate_epsilon(&entries, bit_width);
     let gamma = calculate_gamma(&entries, bit_width);
@@ -59,10 +63,6 @@ fn life_support_rating(entries: &Vec<isize>, bit_width: usize) -> usize {
     let oxygen = oxygen_generator_rating(&entries, bit_width);
 
     co2 * oxygen
-}
-
-fn co2_scrubber_rating(entries: &Vec<isize>, bit_width: usize) -> usize {
-    0
 }
 
 fn oxygen_generator_rating(entries: &Vec<isize>, bit_width: usize) -> usize {
@@ -101,17 +101,6 @@ mod tests {
                                    01010";
 
     #[test]
-    fn test_first_input() {
-        let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
-        let entries = parse_entries(&input);
-
-        assert_eq!(calculate_epsilon(&entries, 5), 9);
-        assert_eq!(calculate_gamma(&entries, 5), 22);
-
-        assert_eq!(diagnostic_power_level(&entries, 5), 198);
-    }
-
-    #[test]
     fn test_bit_counts() {
         let input = vec![0b101010];
         assert_eq!(bit_counts(&input, 6), vec![1, 0, 1, 0, 1, 0]);
@@ -123,5 +112,27 @@ mod tests {
         ];
 
         assert_eq!(bit_counts(&input, 8), vec![1, 2, 1, 2, 1, 2, 1, 2]);
+    }
+
+    #[test]
+    fn test_second_challenge() {
+        let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
+        let entries = parse_entries(&input);
+
+        assert_eq!(co2_scrubber_rating(&entries, 5), 10);
+        assert_eq!(oxygen_generator_rating(&entries, 5), 23);
+
+        assert_eq!(life_support_rating(&entries, 5), 230);
+    }
+
+    #[test]
+    fn test_first_challenge() {
+        let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
+        let entries = parse_entries(&input);
+
+        assert_eq!(calculate_epsilon(&entries, 5), 9);
+        assert_eq!(calculate_gamma(&entries, 5), 22);
+
+        assert_eq!(diagnostic_power_level(&entries, 5), 198);
     }
 }
