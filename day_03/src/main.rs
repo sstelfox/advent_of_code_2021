@@ -1,3 +1,5 @@
+#![allow(unused_variables)]
+
 use common::read_puzzle_input;
 
 fn bit_counts(entries: &Vec<isize>, bit_width: usize) -> Vec<usize> {
@@ -47,7 +49,36 @@ fn calculate_gamma(entries: &Vec<isize>, bit_width: usize) -> usize {
     total
 }
 
-fn co2_scrubber_rating(entries: &Vec<isize>, bit_width: usize) -> usize {
+fn co2_scrubber_rating(entries: Vec<isize>, bit_width: usize) -> usize {
+    let mut remaining_entries = entries;
+
+    let current_bit_index = 0;
+
+    for bit_position in 0..bit_width {
+        let bit_value = 1 << (bit_width - bit_position - 1);
+
+        let bit_counts = bit_counts(&remaining_entries, bit_width);
+
+        let length = remaining_entries.len();
+        let threshold = length / 2;
+
+        remaining_entries = remaining_entries.into_iter().filter(|e| {
+                let one_count = bit_counts[bit_position];
+                let zero_count = length - one_count;
+
+                if one_count == zero_count || bit_counts[bit_position] > threshold {
+                    (e & bit_value) == 0
+                } else {
+                    (e & bit_value) > 0
+                }
+            })
+            .collect();
+
+        if remaining_entries.len() == 1 {
+            return remaining_entries[0] as usize;
+        }
+    }
+
     0
 }
 
@@ -59,13 +90,50 @@ fn diagnostic_power_level(entries: &Vec<isize>, bit_width: usize) -> usize {
 }
 
 fn life_support_rating(entries: &Vec<isize>, bit_width: usize) -> usize {
-    let co2 = co2_scrubber_rating(&entries, bit_width);
-    let oxygen = oxygen_generator_rating(&entries, bit_width);
+    let co2 = co2_scrubber_rating(entries.clone(), bit_width);
+    let oxygen = oxygen_generator_rating(entries.clone(), bit_width);
 
     co2 * oxygen
 }
 
-fn oxygen_generator_rating(entries: &Vec<isize>, bit_width: usize) -> usize {
+fn print_bit_array(array: &Vec<isize>) {
+    print!("[");
+    for i in array.iter() {
+        print!("{:05b}, ", i);
+    }
+    println!("]");
+}
+
+fn oxygen_generator_rating(entries: Vec<isize>, bit_width: usize) -> usize {
+    let mut remaining_entries = entries;
+
+    let current_bit_index = 0;
+
+    for bit_position in 0..bit_width {
+        let bit_value = 1 << (bit_width - bit_position - 1);
+
+        let bit_counts = bit_counts(&remaining_entries, bit_width);
+
+        let length = remaining_entries.len();
+        let threshold = length / 2;
+
+        remaining_entries = remaining_entries.into_iter().filter(|e| {
+                let one_count = bit_counts[bit_position];
+                let zero_count = length - one_count;
+
+                if one_count == zero_count || bit_counts[bit_position] > threshold {
+                    (e & bit_value) > 0
+                } else {
+                    (e & bit_value) == 0
+                }
+            })
+            .collect();
+
+        if remaining_entries.len() == 1 {
+            return remaining_entries[0] as usize;
+        }
+    }
+
     0
 }
 
@@ -119,8 +187,8 @@ mod tests {
         let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
         let entries = parse_entries(&input);
 
-        assert_eq!(co2_scrubber_rating(&entries, 5), 10);
-        assert_eq!(oxygen_generator_rating(&entries, 5), 23);
+        assert_eq!(co2_scrubber_rating(entries.clone(), 5), 10);
+        assert_eq!(oxygen_generator_rating(entries.clone(), 5), 23);
 
         assert_eq!(life_support_rating(&entries, 5), 230);
     }
