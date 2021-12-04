@@ -47,20 +47,28 @@ fn calculate_gamma(entries: &Vec<isize>, bit_width: usize) -> usize {
     total
 }
 
-fn diagnostic_power_level(input: &Vec<String>) -> usize {
-    let bit_len = input[0].trim().len();
-
-    let entries: Vec<isize> = input.iter().map(|bits| isize::from_str_radix(bits, 2).unwrap()).collect();
-
-    let epsilon = calculate_epsilon(&entries, bit_len);
-    let gamma = calculate_gamma(&entries, bit_len);
+fn diagnostic_power_level(entries: &Vec<isize>, bit_width: usize) -> usize {
+    let epsilon = calculate_epsilon(&entries, bit_width);
+    let gamma = calculate_gamma(&entries, bit_width);
 
     epsilon * gamma
 }
 
+fn life_support_rating(input: &Vec<isize>, bit_width: usize) -> usize {
+    0
+}
+
+fn parse_entries(input: &Vec<String>) -> Vec<isize> {
+    input.iter().map(|bits| isize::from_str_radix(bits, 2).unwrap()).collect()
+}
+
 fn main() {
-    let input_entries = read_puzzle_input(3);
-    println!("diagnostic power level: {}", diagnostic_power_level(&input_entries));
+    let input = read_puzzle_input(3);
+    let parsed_input = parse_entries(&input);
+
+    let bit_len = input[0].trim().len();
+
+    println!("diagnostic power level: {}", diagnostic_power_level(&parsed_input, bit_len));
 }
 
 #[cfg(test)]
@@ -83,12 +91,12 @@ mod tests {
     #[test]
     fn test_first_input() {
         let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
+        let entries = parse_entries(&input);
 
-        let entries: Vec<isize> = input.iter().map(|bits| isize::from_str_radix(bits, 2).unwrap()).collect();
         assert_eq!(calculate_epsilon(&entries, 5), 9);
         assert_eq!(calculate_gamma(&entries, 5), 22);
 
-        assert_eq!(diagnostic_power_level(&input), 198);
+        assert_eq!(diagnostic_power_level(&entries, 5), 198);
     }
 
     #[test]
