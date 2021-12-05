@@ -1,5 +1,3 @@
-#![allow(unused_variables)]
-
 use common::read_puzzle_input;
 
 fn bit_counts(entries: &Vec<isize>, bit_width: usize) -> Vec<usize> {
@@ -52,8 +50,6 @@ fn calculate_gamma(entries: &Vec<isize>, bit_width: usize) -> usize {
 fn co2_scrubber_rating(entries: Vec<isize>, bit_width: usize) -> usize {
     let mut remaining_entries = entries;
 
-    let current_bit_index = 0;
-
     for bit_position in 0..bit_width {
         let bit_value = 1 << (bit_width - bit_position - 1);
 
@@ -96,18 +92,8 @@ fn life_support_rating(entries: &Vec<isize>, bit_width: usize) -> usize {
     co2 * oxygen
 }
 
-fn print_bit_array(array: &Vec<isize>) {
-    print!("[");
-    for i in array.iter() {
-        print!("{:05b}, ", i);
-    }
-    println!("]");
-}
-
 fn oxygen_generator_rating(entries: Vec<isize>, bit_width: usize) -> usize {
     let mut remaining_entries = entries;
-
-    let current_bit_index = 0;
 
     for bit_position in 0..bit_width {
         let bit_value = 1 << (bit_width - bit_position - 1);
