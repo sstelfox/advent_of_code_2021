@@ -2,28 +2,46 @@
 
 use common::read_puzzle_input;
 
+#[derive(Debug, PartialEq)]
 struct Board {
-    numbers: [[(usize, bool); 5]; 5],
+    numbers: [(usize, bool); 25],
+}
+
+impl Board {
+    fn is_solved(&self) -> bool {
+        false
+    }
+
+    fn mark_number(&mut self, number: usize) {
+        for (_num, marked) in self.numbers.iter_mut().filter(|(n, _)| n == &number) {
+            *marked = true;
+        }
+    }
+
+    fn unmarked_score(&self) -> usize {
+        self.numbers.iter().filter(|(_, marked)| !marked).map(|(num, _)| num).sum()
+    }
 }
 
 impl From<&[String]> for Board {
     fn from(input: &[String]) -> Board {
         let board_lines: Vec<&str> = input[1..].iter().map(|l| l.trim()).collect();
 
-        let board_numbers: Vec<Vec<usize>> = board_lines.iter()
+        let raw_numbers: Vec<usize> = board_lines.iter()
                 .map(|line| {
                     line.split(' ')
                         .filter(|e| !e.is_empty())
                         .map(|e| e.parse::<usize>().unwrap())
                         .collect::<Vec<usize>>()
                 })
+                .flatten()
                 .collect();
 
-        println!( "{:?}", board_numbers);
+        let board_numbers: Vec<(usize, bool)> = raw_numbers.into_iter().map(|n| (n, false)).collect();
+        let mut numbers: [(usize, bool); 25] =  Default::default();
+        numbers.copy_from_slice(&board_numbers[..25]);
 
-        Board {
-            numbers: [[(0, false); 5]; 5],
-        }
+        Board { numbers }
     }
 }
 
@@ -91,5 +109,131 @@ mod tests {
         for board in input[1..].chunks(6) {
             board_list.push(parse_board(board));
         }
+
+        let expected_boards = vec![
+            Board {
+                numbers: [
+                    (22, false), (13, false), (17, false), (11, false), (0, false),
+                    (8, false),  (2, false),  (23, false), (4, false),  (24, false),
+                    (21, false), (9, false),  (14, false), (16, false), (7, false),
+                    (6, false),  (10, false), (3, false),  (18, false), (5, false),
+                    (1, false),  (12, false), (20, false), (15, false), (19, false),
+                ]
+            },
+            Board {
+                numbers: [
+                    (3, false),  (15, false), (0, false),  (2, false),  (22, false),
+                    (9, false),  (18, false), (13, false), (17, false), (5, false),
+                    (19, false), (8, false),  (7, false),  (25, false), (23, false),
+                    (20, false), (11, false), (10, false), (24, false), (4, false),
+                    (14, false), (21, false), (16, false), (12, false), (6, false),
+                ]
+            },
+            Board {
+                numbers: [
+                    (14, false), (21, false), (17, false), (24, false), (4, false),
+                    (10, false), (16, false), (15, false), (9, false),  (19, false),
+                    (18, false), (8, false),  (23, false), (26, false), (20, false),
+                    (22, false), (11, false), (13, false), (6, false),  (5, false),
+                    (2, false),  (0, false),  (12, false), (3, false),  (7, false),
+                ]
+            },
+        ];
+
+        assert_eq!(board_list, expected_boards);
+    }
+
+    #[test]
+    fn test_board_marking() {
+        let mut board = Board {
+            numbers: [
+                (0, false), (1, false), (2, false), (3, false), (4, false),
+                (5, false), (6, false), (7, false), (8, false),  (9, false),
+                (10, false), (11, false),  (12, false), (13, false), (14, false),
+                (15, false), (6, false), (13, false), (1, false),  (2, false),
+                (24, false),  (0, false),  (12, false), (3, false),  (9, false),
+            ]
+        };
+
+        board.mark_number(2);
+        assert!(board.numbers[2].1);
+        assert!(board.numbers[19].1);
+
+        board.mark_number(24);
+        assert!(board.numbers[20].1);
+
+        let expected_board = Board {
+            numbers: [
+                (0, false), (1, false), (2, true), (3, false), (4, false),
+                (5, false), (6, false), (7, false), (8, false),  (9, false),
+                (10, false), (11, false),  (12, false), (13, false), (14, false),
+                (15, false), (6, false), (13, false), (1, false),  (2, true),
+                (24, true),  (0, false),  (12, false), (3, false),  (9, false),
+            ]
+        };
+
+        assert_eq!(board, expected_board);
+    }
+
+    #[test]
+    fn test_board_scoring() {
+        let board = Board {
+            numbers: [
+                (14, true), (21, true), (17, true), (24, true), (4, true),
+                (10, false), (16, false), (15, false), (9, true),  (19, false),
+                (18, false), (8, false),  (23, true), (26, false), (20, false),
+                (22, false), (11, true), (13, false), (6, false),  (5, true),
+                (2, true),  (0, true),  (12, false), (3, false),  (7, true),
+            ]
+        };
+
+        assert_eq!(board.unmarked_score(), 188);
+    }
+
+    #[test]
+    fn test_solution_verification() {
+        let board = Board {
+            numbers: [
+                (14, false), (21, false), (17, false), (24, false), (4, false),
+                (10, false), (16, false), (15, false), (9, false),  (19, false),
+                (18, false), (8, false),  (23, false), (26, false), (20, false),
+                (22, false), (11, false), (13, false), (6, false),  (5, false),
+                (2, false),  (0, false),  (12, false), (3, false),  (7, false),
+            ]
+        };
+        assert!(!board.is_solved());
+
+        let board = Board {
+            numbers: [
+                (14, false), (21, false), (17, false), (24, false), (4, false),
+                (10, true), (16, true), (15, true), (9, true),  (19, true),
+                (18, false), (8, false),  (23, false), (26, false), (20, false),
+                (22, false), (11, false), (13, false), (6, false),  (5, false),
+                (2, false),  (0, false),  (12, false), (3, false),  (7, false),
+            ]
+        };
+        assert!(board.is_solved());
+
+        let board = Board {
+            numbers: [
+                (14, false), (21, false), (17, false), (24, false), (4, true),
+                (10, false), (16, false), (15, false), (9, false),  (19, true),
+                (18, false), (8, false),  (23, false), (26, false), (20, true),
+                (22, false), (11, false), (13, false), (6, false),  (5, true),
+                (2, false),  (0, false),  (12, false), (3, false),  (7, true),
+            ]
+        };
+        assert!(board.is_solved());
+
+        let board = Board {
+            numbers: [
+                (14, true), (21, false), (17, false), (24, false), (4, false),
+                (10, false), (16, true), (15, false), (9, false),  (19, false),
+                (18, false), (8, false),  (23, true), (26, false), (20, false),
+                (22, false), (11, false), (13, false), (6, true),  (5, false),
+                (2, false),  (0, false),  (12, false), (3, false),  (7, true),
+            ]
+        };
+        assert!(!board.is_solved());
     }
 }
