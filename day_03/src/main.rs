@@ -58,7 +58,9 @@ fn co2_scrubber_rating(entries: Vec<isize>, bit_width: usize) -> usize {
         let length = remaining_entries.len();
         let threshold = length / 2;
 
-        remaining_entries = remaining_entries.into_iter().filter(|e| {
+        remaining_entries = remaining_entries
+            .into_iter()
+            .filter(|e| {
                 let one_count = bit_counts[bit_position];
                 let zero_count = length - one_count;
 
@@ -103,7 +105,9 @@ fn oxygen_generator_rating(entries: Vec<isize>, bit_width: usize) -> usize {
         let length = remaining_entries.len();
         let threshold = length / 2;
 
-        remaining_entries = remaining_entries.into_iter().filter(|e| {
+        remaining_entries = remaining_entries
+            .into_iter()
+            .filter(|e| {
                 let one_count = bit_counts[bit_position];
                 let zero_count = length - one_count;
 
@@ -124,7 +128,10 @@ fn oxygen_generator_rating(entries: Vec<isize>, bit_width: usize) -> usize {
 }
 
 fn parse_entries(input: &Vec<String>) -> Vec<isize> {
-    input.iter().map(|bits| isize::from_str_radix(bits, 2).unwrap()).collect()
+    input
+        .iter()
+        .map(|bits| isize::from_str_radix(bits, 2).unwrap())
+        .collect()
 }
 
 fn main() {
@@ -133,8 +140,14 @@ fn main() {
 
     let bit_len = input[0].trim().len();
 
-    println!("diagnostic power level: {}", diagnostic_power_level(&parsed_input, bit_len));
-    println!("life support rating: {}", life_support_rating(&parsed_input, bit_len));
+    println!(
+        "diagnostic power level: {}",
+        diagnostic_power_level(&parsed_input, bit_len)
+    );
+    println!(
+        "life support rating: {}",
+        life_support_rating(&parsed_input, bit_len)
+    );
 }
 
 #[cfg(test)]
@@ -159,11 +172,7 @@ mod tests {
         let input = vec![0b101010];
         assert_eq!(bit_counts(&input, 6), vec![1, 0, 1, 0, 1, 0]);
 
-        let input = vec![
-            0b01010101,
-            0b11110000,
-            0b00001111,
-        ];
+        let input = vec![0b01010101, 0b11110000, 0b00001111];
 
         assert_eq!(bit_counts(&input, 8), vec![1, 2, 1, 2, 1, 2, 1, 2]);
     }

@@ -3,6 +3,7 @@
 use common::read_puzzle_input;
 
 fn main() {
+    let input_entries = read_puzzle_input(5);
 }
 
 #[cfg(test)]

@@ -44,9 +44,15 @@ impl Position {
     pub fn apply_first_directions(&mut self, directions: &Vec<Direction>) {
         for dir in directions.iter() {
             match dir {
-                Direction::Down(cnt) => { self.depth += cnt; },
-                Direction::Forward(cnt) => { self.horizontal += cnt; },
-                Direction::Up(cnt) => { self.depth -= cnt; },
+                Direction::Down(cnt) => {
+                    self.depth += cnt;
+                }
+                Direction::Forward(cnt) => {
+                    self.horizontal += cnt;
+                }
+                Direction::Up(cnt) => {
+                    self.depth -= cnt;
+                }
             }
         }
     }
@@ -54,12 +60,16 @@ impl Position {
     pub fn apply_second_directions(&mut self, directions: &Vec<Direction>) {
         for dir in directions.iter() {
             match dir {
-                Direction::Down(cnt) => { self.aim += cnt; },
+                Direction::Down(cnt) => {
+                    self.aim += cnt;
+                }
                 Direction::Forward(cnt) => {
                     self.depth += self.aim * cnt;
                     self.horizontal += cnt;
-                },
-                Direction::Up(cnt) => { self.aim -= cnt; },
+                }
+                Direction::Up(cnt) => {
+                    self.aim -= cnt;
+                }
             }
         }
     }
@@ -81,7 +91,10 @@ impl Default for Position {
 
 fn main() {
     let input_entries = read_puzzle_input(2);
-    let directions: Vec<Direction> = input_entries.into_iter().map(|e| Direction::try_from(e).unwrap()).collect();
+    let directions: Vec<Direction> = input_entries
+        .into_iter()
+        .map(|e| Direction::try_from(e).unwrap())
+        .collect();
 
     let mut position = Position::default();
     position.apply_first_directions(&directions);
@@ -107,14 +120,26 @@ mod tests {
 
     #[test]
     fn test_direction_conversion() {
-        assert_eq!(Direction::try_from("down 17".to_string()), Ok(Direction::Down(17)));
-        assert_eq!(Direction::try_from("forward 8".to_string()), Ok(Direction::Forward(8)));
-        assert_eq!(Direction::try_from("up 70".to_string()), Ok(Direction::Up(70)));
+        assert_eq!(
+            Direction::try_from("down 17".to_string()),
+            Ok(Direction::Down(17))
+        );
+        assert_eq!(
+            Direction::try_from("forward 8".to_string()),
+            Ok(Direction::Forward(8))
+        );
+        assert_eq!(
+            Direction::try_from("up 70".to_string()),
+            Ok(Direction::Up(70))
+        );
     }
 
     #[test]
     fn test_run_first_sample_data() {
-        let directions: Vec<Direction> = REFERENCE_INPUT.lines().map(|e| Direction::try_from(e.to_string()).unwrap()).collect();
+        let directions: Vec<Direction> = REFERENCE_INPUT
+            .lines()
+            .map(|e| Direction::try_from(e.to_string()).unwrap())
+            .collect();
 
         let mut position = Position::default();
         position.apply_first_directions(&directions);
@@ -126,7 +151,10 @@ mod tests {
 
     #[test]
     fn test_run_second_sample_data() {
-        let directions: Vec<Direction> = REFERENCE_INPUT.lines().map(|e| Direction::try_from(e.to_string()).unwrap()).collect();
+        let directions: Vec<Direction> = REFERENCE_INPUT
+            .lines()
+            .map(|e| Direction::try_from(e.to_string()).unwrap())
+            .collect();
 
         let mut position = Position::default();
         position.apply_second_directions(&directions);
