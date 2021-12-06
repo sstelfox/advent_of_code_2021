@@ -9,9 +9,16 @@ struct Board {
 
 impl Board {
     fn mark_line(&mut self, line: &Line) {
-        for x_pos in line.0.0..line.1.0 {
-            let y_pos = line.solve_for_y(x_pos);
-            self.positions[x_pos][y_pos] += 1;
+        if line.slope().is_infinite() {
+            let x_pos = line.left().0;
+            for y_pos in line.bottom().1..=line.top().1 {
+                self.positions[y_pos][x_pos] += 1;
+            }
+        } else {
+            for x_pos in line.left().0..=line.right().0 {
+                let y_pos = line.solve_for_y(x_pos);
+                self.positions[y_pos][x_pos] += 1;
+            }
         }
     }
 
@@ -30,10 +37,28 @@ impl Board {
     }
 }
 
+impl std::fmt::Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for row in self.positions.iter() {
+            for position in row.iter() {
+                if *position == 0 {
+                    write!(f, ".")?;
+                } else {
+                    write!(f, "{}", position)?;
+                }
+            }
+
+            write!(f, "\n")?;
+        }
+
+        Ok(())
+    }
+}
+
 impl From<(usize, usize)> for Board {
     fn from((width, height): (usize, usize)) -> Self {
         Board {
-            positions: vec![vec![0; height]; width],
+            positions: vec![vec![0; width]; height],
         }
     }
 }
@@ -42,17 +67,51 @@ impl From<(usize, usize)> for Board {
 struct Line(Point, Point);
 
 impl Line {
+    fn bottom(&self) -> &Point {
+        if self.0.1 >= self.1.1 {
+            &self.1
+        } else {
+            &self.0
+        }
+    }
+
+    fn left(&self) -> &Point {
+        if self.0.0 >= self.1.0 {
+            &self.1
+        } else {
+            &self.0
+        }
+    }
+
+    fn right(&self) -> &Point {
+        if self.0.0 >= self.1.0 {
+            &self.0
+        } else {
+            &self.1
+        }
+    }
+
+    fn top(&self) -> &Point {
+        if self.0.1 >= self.1.1 {
+            &self.0
+        } else {
+            &self.1
+        }
+    }
+}
+
+impl Line {
     fn solve_for_y(&self, x: usize) -> usize {
         let y_value = self.slope() * x as f64 + self.y_intercept() as f64;
         y_value.round() as usize
     }
 
     fn slope(&self) -> f64 {
-        (self.1.1 as f64 - self.0.1 as f64) / (self.1.0 as f64 - self.0.0 as f64)
+        (self.right().1 as f64 - self.left().1 as f64) / (self.right().0 as f64 - self.left().0 as f64)
     }
 
     fn y_intercept(&self) -> f64 {
-        -1.0 * ((self.slope() * self.0.0 as f64) - self.0.1 as f64)
+        -1.0 * ((self.slope() * self.left().0 as f64) - self.left().1 as f64)
     }
 }
 
@@ -79,11 +138,21 @@ fn board_size(lines: &Vec<Line>) -> (usize, usize) {
 
 fn main() {
     let input_entries = read_puzzle_input(5);
-    let first_lines: Vec<Line> = parse_vent_lines(input_entries).into_iter().filter(|l| l.is_straight()).collect();
 
-    let board = Board::from(board_size(&first_lines));
+    let second_lines: Vec<Line> = parse_vent_lines(input_entries).into_iter().collect();
+    let mut second_board = Board::from(board_size(&second_lines));
+    for line in second_lines.iter() {
+        second_board.mark_line(line);
+    }
 
-    // TODO
+    let first_lines: Vec<Line> = second_lines.into_iter().filter(|l| l.is_straight()).collect();
+    let mut first_board = Board::from(board_size(&first_lines));
+    for line in first_lines.iter() {
+        first_board.mark_line(line);
+    }
+
+    println!("first answer: {}", first_board.overlapping_position_count());
+    println!("second answer: {}", second_board.overlapping_position_count());
 }
 
 fn max_height(lines: &Vec<Line>) -> usize {
@@ -193,12 +262,24 @@ mod tests {
         let lines: Vec<Line> = parse_vent_lines(input).into_iter().filter(|l| l.is_straight()).collect();
 
         let mut board = Board::from(board_size(&lines));
-
         for line in lines.iter() {
             board.mark_line(line);
         }
 
         assert_eq!(board.overlapping_position_count(), 5);
+    }
+
+    #[test]
+    fn test_second_part() {
+        let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
+        let lines: Vec<Line> = parse_vent_lines(input).into_iter().collect();
+
+        let mut board = Board::from(board_size(&lines));
+        for line in lines.iter() {
+            board.mark_line(line);
+        }
+
+        assert_eq!(board.overlapping_position_count(), 12);
     }
 
     #[test]
