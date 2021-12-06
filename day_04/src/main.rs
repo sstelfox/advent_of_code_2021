@@ -2,7 +2,7 @@
 
 use common::read_puzzle_input;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 struct Board {
     numbers: [(usize, bool); 25],
 }
@@ -66,8 +66,12 @@ fn main() {
         board_list.push(parse_board(board));
     }
 
-    let result = play_boards(&mut board_list, &rng_nums);
+    let mut first_game = board_list.clone();
+    let result = play_boards(&mut first_game, &rng_nums);
     println!("first part result: {:?}", result);
+
+    let result = last_board(board_list, &rng_nums);
+    println!("second part result: {:?}", result);
 }
 
 fn parse_board(lines: &[String]) -> Board {
@@ -79,6 +83,23 @@ fn parse_random_header(line: &str) -> Vec<usize> {
         .split(',')
         .map(|num| num.parse::<usize>().unwrap())
         .collect()
+}
+
+fn last_board(mut boards: Vec<Board>, call_outs: &Vec<usize>) -> Option<usize> {
+    for number in call_outs.iter() {
+
+        for board in boards.iter_mut() {
+            board.mark_number(*number);
+        }
+
+        if boards.len() == 1 && boards[0].is_solved() {
+            return Some(*number * boards[0].unmarked_score());
+        } else {
+            boards = boards.into_iter().filter(|b| !b.is_solved()).collect();
+        }
+    }
+
+    None
 }
 
 fn play_boards(boards: &mut Vec<Board>, call_outs: &Vec<usize>) -> Option<usize> {
@@ -142,6 +163,20 @@ mod tests {
         }
 
         assert_eq!(play_boards(&mut board_list, &rng_nums), Some(4512));
+    }
+
+    #[test]
+    fn test_second_answer() {
+        let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
+
+        let rng_nums = parse_random_header(&input[0]);
+
+        let mut board_list = vec![];
+        for board in input[1..].chunks(6) {
+            board_list.push(parse_board(board));
+        }
+
+        assert_eq!(last_board(board_list, &rng_nums), Some(1924));
     }
 
     #[test]
