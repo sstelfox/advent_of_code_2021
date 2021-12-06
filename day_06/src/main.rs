@@ -4,41 +4,53 @@ use common::read_puzzle_input;
 
 #[derive(Debug)]
 struct Pond {
-    fish: Vec<usize>,
+    fish_buckets: [usize; 9]
 }
 
 impl Pond {
     fn advance(&mut self, count: usize) {
-        for _ in 0..count {
-            let mut new_fish = 0;
-
-            for fish in self.fish.iter_mut() {
-                if *fish == 0 {
-                    *fish += 6;
-                    new_fish += 1;
+        for i in 0..count {
+            let mut new_fish_buckets: [usize; 9] = [0; 9];
+            for (ticks, count) in self.fish_buckets.iter().enumerate() {
+                if ticks == 0 {
+                    new_fish_buckets[6] += count;
+                    new_fish_buckets[8] += count;
                 } else {
-                    *fish -= 1;
+                    new_fish_buckets[ticks - 1] += count;
                 }
             }
 
-            for _ in 0..new_fish {
-                self.fish.push(8);
-            }
+            self.fish_buckets = new_fish_buckets;
         }
     }
 
     fn count(&self) -> usize {
-        self.fish.len()
+        self.fish_buckets.iter().sum()
+    }
+}
+
+impl From<String> for Pond {
+    fn from(start: String) -> Self {
+        let fish: Vec<usize> = start.trim().split(',').map(|i| i.parse::<usize>().unwrap()).collect();
+
+        let mut pond = Pond { fish_buckets: [0; 9] };
+        for f in fish.iter() {
+            pond.fish_buckets[*f] += 1;
+        }
+
+        pond
     }
 }
 
 fn main() {
     let input = read_puzzle_input(6);
-    let fish: Vec<usize> = input[0].trim().split(',').map(|i| i.parse::<usize>().unwrap()).collect();
-    let mut pond = Pond { fish };
+    let mut pond = Pond::from(input[0].clone());
 
     pond.advance(80);
     println!("first question:{}", pond.count());
+
+    pond.advance(176);
+    println!("second question:{}", pond.count());
 }
 
 #[cfg(test)]
@@ -50,8 +62,7 @@ mod tests {
     #[test]
     fn test_first_part() {
         let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
-        let fish: Vec<usize> = input[0].trim().split(',').map(|i| i.parse::<usize>().unwrap()).collect();
-        let mut pond = Pond { fish };
+        let mut pond = Pond::from(input[0].clone());
 
         pond.advance(18);
         assert_eq!(pond.count(), 26);
@@ -63,7 +74,9 @@ mod tests {
     #[test]
     fn test_second_part() {
         let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
+        let mut pond = Pond::from(input[0].clone());
 
-        // TODO
+        pond.advance(256);
+        assert_eq!(pond.count(), 26984457539);
     }
 }
