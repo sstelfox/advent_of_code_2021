@@ -3,7 +3,58 @@
 use common::read_puzzle_input;
 
 #[derive(Debug, PartialEq)]
+struct Board {
+    positions: Vec<Vec<usize>>,
+}
+
+impl Board {
+    fn mark_line(&mut self, line: &Line) {
+        for x_pos in line.0.0..line.1.0 {
+            let y_pos = line.solve_for_y(x_pos);
+            self.positions[x_pos][y_pos] += 1;
+        }
+    }
+
+    fn overlapping_position_count(&self) -> usize {
+        let mut count = 0;
+
+        for row in self.positions.iter() {
+            for position in row.iter() {
+                if *position > 1 {
+                    count += 1;
+                }
+            }
+        }
+
+        count
+    }
+}
+
+impl From<(usize, usize)> for Board {
+    fn from((width, height): (usize, usize)) -> Self {
+        Board {
+            positions: vec![vec![0; height]; width],
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
 struct Line(Point, Point);
+
+impl Line {
+    fn solve_for_y(&self, x: usize) -> usize {
+        let y_value = self.slope() * x as f64 + self.y_intercept() as f64;
+        y_value.round() as usize
+    }
+
+    fn slope(&self) -> f64 {
+        (self.1.1 as f64 - self.0.1 as f64) / (self.1.0 as f64 - self.0.0 as f64)
+    }
+
+    fn y_intercept(&self) -> f64 {
+        -1.0 * ((self.slope() * self.0.0 as f64) - self.0.1 as f64)
+    }
+}
 
 impl Line {
     fn is_straight(&self) -> bool {
@@ -22,11 +73,49 @@ impl Line {
 #[derive(Debug, PartialEq)]
 struct Point(usize, usize);
 
+fn board_size(lines: &Vec<Line>) -> (usize, usize) {
+    (max_width(lines) + 1, max_height(lines) + 1)
+}
+
 fn main() {
     let input_entries = read_puzzle_input(5);
     let first_lines: Vec<Line> = parse_vent_lines(input_entries).into_iter().filter(|l| l.is_straight()).collect();
 
+    let board = Board::from(board_size(&first_lines));
+
     // TODO
+}
+
+fn max_height(lines: &Vec<Line>) -> usize {
+    let mut max_height = 0;
+
+    for l in lines.iter() {
+        if l.0.1 > max_height {
+            max_height = l.0.1;
+        }
+
+        if l.1.1 > max_height {
+            max_height = l.1.1;
+        }
+    }
+
+    max_height
+}
+
+fn max_width(lines: &Vec<Line>) -> usize {
+    let mut max_width = 0;
+
+    for l in lines.iter() {
+        if l.0.0 > max_width {
+            max_width = l.0.0;
+        }
+
+        if l.1.0 > max_width {
+            max_width = l.1.0;
+        }
+    }
+
+    max_width
 }
 
 fn parse_vent_lines(lines: Vec<String>) -> Vec<Line> {
@@ -62,6 +151,14 @@ mod tests {
                                    5,5 -> 8,2";
 
     #[test]
+    fn test_board_size() {
+        let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
+        let lines = parse_vent_lines(input);
+
+        assert_eq!(board_size(&lines), (10, 10));
+    }
+
+    #[test]
     fn test_line_parser() {
         let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
         let lines = parse_vent_lines(input);
@@ -83,11 +180,25 @@ mod tests {
     }
 
     #[test]
+    fn test_line_solutions() {
+        let line = Line(Point(3, 5), Point(6, 11));
+        assert_eq!(line.slope(), 2.0);
+        assert_eq!(line.y_intercept(), -1.0);
+        assert_eq!(line.solve_for_y(9), 17);
+    }
+
+    #[test]
     fn test_first_part() {
         let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
         let lines: Vec<Line> = parse_vent_lines(input).into_iter().filter(|l| l.is_straight()).collect();
 
-        // TODO
+        let mut board = Board::from(board_size(&lines));
+
+        for line in lines.iter() {
+            board.mark_line(line);
+        }
+
+        assert_eq!(board.overlapping_position_count(), 5);
     }
 
     #[test]
