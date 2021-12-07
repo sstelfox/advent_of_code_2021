@@ -13,7 +13,7 @@ impl ShipLine {
         let mut target_position: usize = 0;
 
         for target in 0..self.width {
-            let fuel_for_target  = self.fuel_to_position(target);
+            let fuel_for_target  = self.linear_fuel_to_position(target);
 
             if let Some(current_val) = min_fuel {
                 if fuel_for_target < current_val {
@@ -29,7 +29,7 @@ impl ShipLine {
         (target_position, min_fuel.unwrap())
     }
 
-    fn fuel_to_position(&self, target_position: usize) -> usize {
+    fn linear_fuel_to_position(&self, target_position: usize) -> usize {
         if target_position >= self.width {
             panic!("attempt to move ships into position beyond the end");
         }
@@ -77,14 +77,14 @@ mod tests {
         let input: Vec<String> = REFERENCE_INPUT.lines().map(|e| e.to_string()).collect();
         let positions: Vec<usize> = input[0].split(',').map(|i| i.parse::<usize>().unwrap()).collect();
 
-        assert_eq!(positions.len(), 19);
+        assert_eq!(positions.len(), 10);
 
         let ship_line = ShipLine::from(positions);
 
-        assert_eq!(ship_line.fuel_to_position(1), 41);
-        assert_eq!(ship_line.fuel_to_position(2), 37);
-        assert_eq!(ship_line.fuel_to_position(3), 39);
-        assert_eq!(ship_line.fuel_to_position(10), 71);
+        assert_eq!(ship_line.linear_fuel_to_position(1), 41);
+        assert_eq!(ship_line.linear_fuel_to_position(2), 37);
+        assert_eq!(ship_line.linear_fuel_to_position(3), 39);
+        assert_eq!(ship_line.linear_fuel_to_position(10), 71);
 
         assert_eq!(ship_line.minimum_fuel_usage(), (2, 37));
     }
