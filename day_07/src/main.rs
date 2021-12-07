@@ -8,11 +8,13 @@ struct ShipLine {
 }
 
 fn factorial_sum(count: usize) -> usize {
-    if count <= 1 {
-        return 1;
+    let mut sum = 0;
+
+    for n in 0..=count {
+        sum += n;
     }
 
-    count + factorial_sum(count - 1)
+    sum
 }
 
 impl ShipLine {
