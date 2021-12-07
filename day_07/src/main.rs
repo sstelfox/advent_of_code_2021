@@ -7,7 +7,57 @@ struct ShipLine {
     width: usize,
 }
 
+fn factorial_sum(count: usize) -> usize {
+    if count <= 1 {
+        return 1;
+    }
+
+    count + factorial_sum(count - 1)
+}
+
 impl ShipLine {
+    fn factorial_fuel_to_position(&self, target_position: usize) -> usize {
+        if target_position >= self.width {
+            panic!("attempt to move ships into position beyond the end");
+        }
+
+        let mut total_fuel = 0;
+
+        for (existing_position, count) in self.positions.iter().enumerate() {
+            let distance = (target_position as isize - existing_position as isize).abs() as usize;
+
+            if distance == 0 {
+                continue;
+            }
+
+            let fuel_cost = factorial_sum(distance);
+            total_fuel += fuel_cost * count;
+        }
+
+        total_fuel
+    }
+
+    fn minimum_factorial_fuel_usage(&self) -> (usize, usize) {
+        let mut min_fuel: Option<usize> = None;
+        let mut target_position: usize = 0;
+
+        for target in 0..self.width {
+            let fuel_for_target  = self.factorial_fuel_to_position(target);
+
+            if let Some(current_val) = min_fuel {
+                if fuel_for_target < current_val {
+                    target_position = target;
+                    min_fuel = Some(fuel_for_target);
+                }
+            } else {
+                target_position = target;
+                min_fuel = Some(fuel_for_target);
+            };
+        }
+
+        (target_position, min_fuel.unwrap())
+    }
+
     fn minimum_linear_fuel_usage(&self) -> (usize, usize) {
         let mut min_fuel: Option<usize> = None;
         let mut target_position: usize = 0;
@@ -63,7 +113,8 @@ fn main() {
     let positions: Vec<usize> = input_entries[0].split(",").map(|i| i.parse::<usize>().unwrap()).collect();
 
     let ship_line = ShipLine::from(positions);
-    println!("minimum fuel for alignment: {:?}", ship_line.minimum_linear_fuel_usage());
+    println!("minimum fuel for linear alignment: {:?}", ship_line.minimum_linear_fuel_usage());
+    println!("minimum fuel for factorial alignment: {:?}", ship_line.minimum_factorial_fuel_usage());
 }
 
 #[cfg(test)]
@@ -95,5 +146,10 @@ mod tests {
         let positions: Vec<usize> = input[0].split(',').map(|i| i.parse::<usize>().unwrap()).collect();
 
         let ship_line = ShipLine::from(positions);
+
+        assert_eq!(ship_line.factorial_fuel_to_position(2), 206);
+        assert_eq!(ship_line.factorial_fuel_to_position(5), 168);
+
+        assert_eq!(ship_line.minimum_factorial_fuel_usage(), (5, 168));
     }
 }
