@@ -65,18 +65,18 @@ impl From<String> for Pond {
 }
 
 fn main() {
-    //let input = read_puzzle_input(6);
-    //let mut pond = Pond::from(input[0].clone());
+    let input = read_puzzle_input(6);
+    let mut pond = Pond::from(input[0].clone());
 
-    //pond.advance(80);
-    //println!("first question:{}", pond.count());
+    pond.advance(80);
+    println!("first question:{}", pond.count());
 
-    //pond.advance(176);
-    //println!("second question:{}", pond.count());
+    pond.advance(176);
+    println!("second question:{}", pond.count());
 
-    let mut pond = Pond::from("3,4,3,1,2".to_string());
-    pond.advance(9999999);
-    println!("9999999 challenge result: {}", pond.count());
+    //let mut pond = Pond::from("3,4,3,1,2".to_string());
+    //pond.advance(9999999);
+    //println!("9999999 challenge result: {}", pond.count());
 }
 
 #[cfg(test)]

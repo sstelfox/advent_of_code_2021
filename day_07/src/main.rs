@@ -8,7 +8,7 @@ struct ShipLine {
 }
 
 impl ShipLine {
-    fn minimum_fuel_usage(&self) -> (usize, usize) {
+    fn minimum_linear_fuel_usage(&self) -> (usize, usize) {
         let mut min_fuel: Option<usize> = None;
         let mut target_position: usize = 0;
 
@@ -63,7 +63,7 @@ fn main() {
     let positions: Vec<usize> = input_entries[0].split(",").map(|i| i.parse::<usize>().unwrap()).collect();
 
     let ship_line = ShipLine::from(positions);
-    println!("minimum fuel for alignment: {:?}", ship_line.minimum_fuel_usage());
+    println!("minimum fuel for alignment: {:?}", ship_line.minimum_linear_fuel_usage());
 }
 
 #[cfg(test)]
@@ -86,7 +86,7 @@ mod tests {
         assert_eq!(ship_line.linear_fuel_to_position(3), 39);
         assert_eq!(ship_line.linear_fuel_to_position(10), 71);
 
-        assert_eq!(ship_line.minimum_fuel_usage(), (2, 37));
+        assert_eq!(ship_line.minimum_linear_fuel_usage(), (2, 37));
     }
 
     #[test]
